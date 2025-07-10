@@ -1,14 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiFileText, FiDownload, FiX, FiSettings, FiUser, FiBarChart3 } = FiIcons;
+const { FiFileText, FiDownload, FiX, FiSettings, FiUser, FiBarChart3, FiTrendingUp, FiDollarSign } = FiIcons;
 
 const PDFGenerator = ({ onClose }) => {
+  // Get evaluations from localStorage
+  const [evaluations, setEvaluations] = useState([]);
+  const [selectedEvaluation, setSelectedEvaluation] = useState(null);
+
+  useEffect(() => {
+    const storedEvaluations = JSON.parse(localStorage.getItem('financialEvaluations') || '[]');
+    setEvaluations(storedEvaluations);
+  }, []);
+
   const [reportData, setReportData] = useState({
     title: '',
-    client: '',
+    evaluationId: '',
     reportType: '',
     dateRange: '',
     includeCharts: true,
@@ -18,6 +27,21 @@ const PDFGenerator = ({ onClose }) => {
   });
 
   const [isGenerating, setIsGenerating] = useState(false);
+
+  useEffect(() => {
+    if (reportData.evaluationId) {
+      const evaluation = evaluations.find(e => e.id === parseInt(reportData.evaluationId));
+      if (evaluation) {
+        setSelectedEvaluation(evaluation);
+        // Auto-populate report title based on selected evaluation
+        setReportData(prev => ({
+          ...prev,
+          title: `${evaluation.evaluationType.charAt(0).toUpperCase() + evaluation.evaluationType.slice(1)} Report - ${evaluation.clientName}`,
+          dateRange: new Date(evaluation.evaluationDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
+        }));
+      }
+    }
+  }, [reportData.evaluationId, evaluations]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -29,14 +53,27 @@ const PDFGenerator = ({ onClose }) => {
 
   const handleGenerate = async () => {
     setIsGenerating(true);
-    
     // Simulate PDF generation
     await new Promise(resolve => setTimeout(resolve, 2000));
     
     // In a real app, you would use a library like jsPDF or call an API
     console.log('Generating PDF with data:', reportData);
-    alert('PDF report generated successfully!');
     
+    // Save report to localStorage
+    const reports = JSON.parse(localStorage.getItem('financialReports') || '[]');
+    const newReport = {
+      id: Date.now(),
+      ...reportData,
+      evaluation: selectedEvaluation,
+      createdAt: new Date().toISOString(),
+      status: 'completed',
+      size: `${Math.floor(Math.random() * 3) + 1}.${Math.floor(Math.random() * 9)}MB`
+    };
+    
+    reports.push(newReport);
+    localStorage.setItem('financialReports', JSON.stringify(reports));
+    
+    alert('PDF report generated successfully!');
     setIsGenerating(false);
     onClose();
   };
@@ -68,13 +105,68 @@ const PDFGenerator = ({ onClose }) => {
         </div>
 
         <div className="p-6 space-y-6">
+          {/* Evaluation Selection */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+              <SafeIcon icon={FiBarChart3} className="mr-2" />
+              Financial Evaluation
+            </h3>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Evaluation
+              </label>
+              <select
+                name="evaluationId"
+                value={reportData.evaluationId}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Select an evaluation</option>
+                {evaluations.map(evaluation => (
+                  <option key={evaluation.id} value={evaluation.id}>
+                    {evaluation.clientName} - {evaluation.evaluationType} ({new Date(evaluation.evaluationDate).toLocaleDateString()})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {selectedEvaluation && (
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                <div className="flex items-start space-x-3">
+                  <div className="bg-blue-100 p-2 rounded-full">
+                    <SafeIcon icon={FiUser} className="text-blue-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900">{selectedEvaluation.clientName}</h4>
+                    <p className="text-sm text-gray-600">
+                      {selectedEvaluation.evaluationType.charAt(0).toUpperCase() + selectedEvaluation.evaluationType.slice(1)} Evaluation
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Date: {new Date(selectedEvaluation.evaluationDate).toLocaleDateString()}
+                    </p>
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      <div className="bg-white rounded p-2 text-sm">
+                        <span className="text-gray-600">Revenue:</span>
+                        <span className="ml-1 font-medium">${Number(selectedEvaluation.revenue).toLocaleString()}</span>
+                      </div>
+                      <div className="bg-white rounded p-2 text-sm">
+                        <span className="text-gray-600">Expenses:</span>
+                        <span className="ml-1 font-medium">${Number(selectedEvaluation.expenses).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Basic Information */}
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
               <SafeIcon icon={FiSettings} className="mr-2" />
               Report Configuration
             </h3>
-            
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -89,21 +181,6 @@ const PDFGenerator = ({ onClose }) => {
                   placeholder="Enter report title"
                 />
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Client Name
-                </label>
-                <input
-                  type="text"
-                  name="client"
-                  value={reportData.client}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter client name"
-                />
-              </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -123,7 +200,6 @@ const PDFGenerator = ({ onClose }) => {
                     <option value="risk">Risk Assessment</option>
                   </select>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Date Range
@@ -156,7 +232,6 @@ const PDFGenerator = ({ onClose }) => {
                 <h4 className="font-medium text-gray-900">Standard Template</h4>
                 <p className="text-sm text-gray-600">Professional layout with charts and tables</p>
               </div>
-              
               <div
                 className={`p-4 border-2 rounded-lg cursor-pointer transition-colors ${
                   reportData.template === 'executive'
@@ -185,7 +260,6 @@ const PDFGenerator = ({ onClose }) => {
                 />
                 <span className="ml-3 text-sm text-gray-700">Include Financial Charts</span>
               </label>
-              
               <label className="flex items-center">
                 <input
                   type="checkbox"
@@ -196,7 +270,6 @@ const PDFGenerator = ({ onClose }) => {
                 />
                 <span className="ml-3 text-sm text-gray-700">Include Financial Ratios</span>
               </label>
-              
               <label className="flex items-center">
                 <input
                   type="checkbox"
@@ -211,20 +284,81 @@ const PDFGenerator = ({ onClose }) => {
           </div>
 
           {/* Preview */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-3">Preview</h3>
-            <div className="bg-white border border-gray-200 rounded p-4 min-h-32">
-              <div className="text-center">
-                <SafeIcon icon={FiFileText} className="text-3xl text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-600">
-                  {reportData.title || 'Report Title'} - {reportData.client || 'Client Name'}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {reportData.template === 'standard' ? 'Standard Template' : 'Executive Summary'}
-                </p>
+          {selectedEvaluation && (
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="text-lg font-medium text-gray-900 mb-3">Preview</h3>
+              <div className="bg-white border border-gray-200 rounded p-4">
+                <div className="text-center mb-4">
+                  <SafeIcon icon={FiFileText} className="text-3xl text-blue-600 mx-auto mb-2" />
+                  <p className="font-medium text-gray-900">
+                    {reportData.title || 'Report Title'}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {reportData.template === 'standard' ? 'Standard Template' : 'Executive Summary'}
+                  </p>
+                </div>
+                
+                <div className="space-y-3 text-sm border-t border-gray-100 pt-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Client:</span>
+                    <span className="font-medium">{selectedEvaluation.clientName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Period:</span>
+                    <span className="font-medium">{reportData.dateRange}</span>
+                  </div>
+                  
+                  {reportData.includeCharts && (
+                    <div className="py-2">
+                      <div className="flex items-center text-blue-600 mb-1">
+                        <SafeIcon icon={FiTrendingUp} className="mr-1" />
+                        <span className="text-xs">Financial Charts</span>
+                      </div>
+                      <div className="h-10 bg-gray-100 rounded flex items-center justify-center">
+                        <span className="text-xs text-gray-500">Revenue & Expenses Chart</span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {reportData.includeRatios && (
+                    <div className="py-2">
+                      <div className="flex items-center text-green-600 mb-1">
+                        <SafeIcon icon={FiPieChart} className="mr-1" />
+                        <span className="text-xs">Financial Ratios</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        {selectedEvaluation.profitMargin && (
+                          <div className="flex justify-between bg-gray-50 p-1 rounded">
+                            <span>Profit Margin:</span>
+                            <span>{selectedEvaluation.profitMargin}%</span>
+                          </div>
+                        )}
+                        {selectedEvaluation.currentRatio && (
+                          <div className="flex justify-between bg-gray-50 p-1 rounded">
+                            <span>Current Ratio:</span>
+                            <span>{selectedEvaluation.currentRatio}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {reportData.includeRecommendations && selectedEvaluation.recommendations && (
+                    <div className="py-2">
+                      <div className="flex items-center text-purple-600 mb-1">
+                        <SafeIcon icon={FiDollarSign} className="mr-1" />
+                        <span className="text-xs">Recommendations</span>
+                      </div>
+                      <div className="bg-gray-50 p-2 rounded text-xs">
+                        {selectedEvaluation.recommendations.substring(0, 50)}
+                        {selectedEvaluation.recommendations.length > 50 ? '...' : ''}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Actions */}
@@ -238,10 +372,9 @@ const PDFGenerator = ({ onClose }) => {
             >
               Cancel
             </motion.button>
-            
             <motion.button
               onClick={handleGenerate}
-              disabled={isGenerating}
+              disabled={isGenerating || !selectedEvaluation}
               className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}

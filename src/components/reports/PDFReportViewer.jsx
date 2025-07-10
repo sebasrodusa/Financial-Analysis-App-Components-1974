@@ -1,70 +1,93 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import SafeIcon from '../../common/SafeIcon';
 import PDFGenerator from './PDFGenerator';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiFileText, FiDownload, FiEye, FiPlus, FiFilter, FiSearch, FiX } = FiIcons;
+const { FiFileText, FiDownload, FiEye, FiPlus, FiFilter, FiSearch, FiX, FiUser, FiCalendar } = FiIcons;
 
 const PDFReportViewer = () => {
+  const [reports, setReports] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [showGenerator, setShowGenerator] = useState(false);
 
-  // Sample reports data
-  const reports = [
-    {
-      id: 1,
-      title: 'Q4 2024 Financial Analysis - ABC Corp',
-      type: 'quarterly',
-      client: 'ABC Corp',
-      date: '2024-12-15',
-      size: '2.4 MB',
-      status: 'completed'
-    },
-    {
-      id: 2,
-      title: 'Annual Review - Tech Innovations Inc',
-      type: 'annual',
-      client: 'Tech Innovations Inc',
-      date: '2024-12-10',
-      size: '3.1 MB',
-      status: 'completed'
-    },
-    {
-      id: 3,
-      title: 'Loan Application Analysis - StartupXYZ',
-      type: 'loan',
-      client: 'StartupXYZ',
-      date: '2024-12-08',
-      size: '1.8 MB',
-      status: 'completed'
-    },
-    {
-      id: 4,
-      title: 'Investment Analysis - GreenTech Solutions',
-      type: 'investment',
-      client: 'GreenTech Solutions',
-      date: '2024-12-05',
-      size: '2.9 MB',
-      status: 'pending'
-    },
-    {
-      id: 5,
-      title: 'Risk Assessment - Manufacturing Co',
-      type: 'risk',
-      client: 'Manufacturing Co',
-      date: '2024-12-01',
-      size: '2.2 MB',
-      status: 'completed'
+  // Load reports from localStorage
+  useEffect(() => {
+    const storedReports = JSON.parse(localStorage.getItem('financialReports') || '[]');
+    if (storedReports.length > 0) {
+      setReports(storedReports);
+    } else {
+      // Fallback to sample reports if none are in localStorage
+      setReports([
+        {
+          id: 1,
+          title: 'Q4 2024 Financial Analysis - ABC Corp',
+          type: 'quarterly',
+          client: 'ABC Corp',
+          date: '2024-12-15',
+          size: '2.4 MB',
+          status: 'completed'
+        },
+        {
+          id: 2,
+          title: 'Annual Review - Tech Innovations Inc',
+          type: 'annual',
+          client: 'Tech Innovations Inc',
+          date: '2024-12-10',
+          size: '3.1 MB',
+          status: 'completed'
+        },
+        {
+          id: 3,
+          title: 'Loan Application Analysis - StartupXYZ',
+          type: 'loan',
+          client: 'StartupXYZ',
+          date: '2024-12-08',
+          size: '1.8 MB',
+          status: 'completed'
+        },
+        {
+          id: 4,
+          title: 'Investment Analysis - GreenTech Solutions',
+          type: 'investment',
+          client: 'GreenTech Solutions',
+          date: '2024-12-05',
+          size: '2.9 MB',
+          status: 'pending'
+        },
+        {
+          id: 5,
+          title: 'Risk Assessment - Manufacturing Co',
+          type: 'risk',
+          client: 'Manufacturing Co',
+          date: '2024-12-01',
+          size: '2.2 MB',
+          status: 'completed'
+        }
+      ]);
     }
-  ];
+  }, []);
+
+  // Update reports list when a new report is generated
+  useEffect(() => {
+    if (!showGenerator) {
+      const storedReports = JSON.parse(localStorage.getItem('financialReports') || '[]');
+      if (storedReports.length > 0) {
+        setReports(storedReports);
+      }
+    }
+  }, [showGenerator]);
 
   const filteredReports = reports.filter(report => {
-    const matchesSearch = report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         report.client.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterType === 'all' || report.type === filterType;
+    const matchesSearch = 
+      report.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      report.client?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      report.evaluation?.clientName?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesFilter = filterType === 'all' || report.type === filterType || report.reportType === filterType;
+    
     return matchesSearch && matchesFilter;
   });
 
@@ -110,6 +133,15 @@ const PDFReportViewer = () => {
     }
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
   if (showGenerator) {
     return <PDFGenerator onClose={() => setShowGenerator(false)} />;
   }
@@ -130,7 +162,6 @@ const PDFReportViewer = () => {
             <p className="text-gray-600">Manage and view your financial reports</p>
           </div>
         </div>
-        
         <motion.button
           onClick={() => setShowGenerator(true)}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
@@ -157,7 +188,6 @@ const PDFReportViewer = () => {
               />
             </div>
           </div>
-          
           <div className="flex items-center space-x-2">
             <SafeIcon icon={FiFilter} className="text-gray-500" />
             <select
@@ -182,7 +212,6 @@ const PDFReportViewer = () => {
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             Reports ({filteredReports.length})
           </h2>
-          
           <div className="space-y-4">
             {filteredReports.map((report, index) => (
               <motion.div
@@ -196,13 +225,22 @@ const PDFReportViewer = () => {
                   <div className="p-2 bg-blue-100 rounded-lg">
                     <SafeIcon icon={FiFileText} className="text-blue-600" />
                   </div>
-                  
                   <div>
                     <h3 className="font-medium text-gray-900">{report.title}</h3>
-                    <p className="text-sm text-gray-600">{report.client}</p>
+                    <div className="flex items-center text-sm text-gray-600 mt-1">
+                      <SafeIcon icon={FiUser} className="mr-1" />
+                      <span>{report.client || report.evaluation?.clientName}</span>
+                      
+                      {report.dateRange && (
+                        <span className="ml-3 flex items-center">
+                          <SafeIcon icon={FiCalendar} className="mr-1" />
+                          {report.dateRange}
+                        </span>
+                      )}
+                    </div>
                     <div className="flex items-center space-x-2 mt-1">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(report.type)}`}>
-                        {report.type}
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(report.type || report.reportType)}`}>
+                        {(report.type || report.reportType || '').charAt(0).toUpperCase() + (report.type || report.reportType || '').slice(1)}
                       </span>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(report.status)}`}>
                         {report.status}
@@ -210,13 +248,11 @@ const PDFReportViewer = () => {
                     </div>
                   </div>
                 </div>
-                
                 <div className="flex items-center space-x-4 text-sm text-gray-500">
                   <div className="text-right">
-                    <p>{report.date}</p>
+                    <p>{formatDate(report.date || report.createdAt)}</p>
                     <p>{report.size}</p>
                   </div>
-                  
                   <div className="flex items-center space-x-2">
                     <motion.button
                       onClick={() => handleViewReport(report)}
@@ -227,7 +263,6 @@ const PDFReportViewer = () => {
                     >
                       <SafeIcon icon={FiEye} />
                     </motion.button>
-                    
                     <motion.button
                       onClick={() => handleDownloadReport(report)}
                       className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
@@ -241,7 +276,6 @@ const PDFReportViewer = () => {
                 </div>
               </motion.div>
             ))}
-            
             {filteredReports.length === 0 && (
               <div className="text-center py-8">
                 <SafeIcon icon={FiFileText} className="text-4xl text-gray-400 mx-auto mb-4" />
@@ -277,15 +311,74 @@ const PDFReportViewer = () => {
                 </button>
               </div>
             </div>
-            
-            <div className="p-6 h-96 bg-gray-50 flex items-center justify-center">
-              <div className="text-center">
+            <div className="p-6">
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <h3 className="font-medium text-gray-900 mb-2">Report Details</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-500">Client</p>
+                    <p className="font-medium">{selectedReport.client || selectedReport.evaluation?.clientName}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Date</p>
+                    <p className="font-medium">{formatDate(selectedReport.date || selectedReport.createdAt)}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Type</p>
+                    <p className="font-medium capitalize">{selectedReport.type || selectedReport.reportType}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Status</p>
+                    <p className="font-medium capitalize">{selectedReport.status}</p>
+                  </div>
+                </div>
+              </div>
+              
+              {selectedReport.evaluation && (
+                <div className="mb-6">
+                  <h3 className="font-medium text-gray-900 mb-2">Financial Summary</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-blue-50 p-3 rounded-lg">
+                      <p className="text-sm text-gray-500">Revenue</p>
+                      <p className="text-lg font-semibold">${Number(selectedReport.evaluation.revenue).toLocaleString()}</p>
+                    </div>
+                    <div className="bg-green-50 p-3 rounded-lg">
+                      <p className="text-sm text-gray-500">Expenses</p>
+                      <p className="text-lg font-semibold">${Number(selectedReport.evaluation.expenses).toLocaleString()}</p>
+                    </div>
+                    <div className="bg-purple-50 p-3 rounded-lg">
+                      <p className="text-sm text-gray-500">Profit</p>
+                      <p className="text-lg font-semibold">
+                        ${Number(selectedReport.evaluation.revenue - selectedReport.evaluation.expenses).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="bg-orange-50 p-3 rounded-lg">
+                      <p className="text-sm text-gray-500">Margin</p>
+                      <p className="text-lg font-semibold">
+                        {selectedReport.evaluation.profitMargin || 
+                          Math.round((selectedReport.evaluation.revenue - selectedReport.evaluation.expenses) / 
+                          selectedReport.evaluation.revenue * 100)}%
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <div className="text-center py-8 bg-gray-100 rounded-lg">
                 <SafeIcon icon={FiFileText} className="text-6xl text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600 mb-4">PDF Viewer would be implemented here</p>
                 <p className="text-sm text-gray-500">
-                  In a real application, you would integrate with a PDF viewer library
-                  like react-pdf or pdf.js to display the actual PDF content.
+                  In a real application, you would integrate with a PDF viewer library like react-pdf or pdf.js to display the actual PDF content.
                 </p>
+                <div className="mt-6">
+                  <button
+                    onClick={() => handleDownloadReport(selectedReport)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center"
+                  >
+                    <SafeIcon icon={FiDownload} className="mr-2" />
+                    Download Report
+                  </button>
+                </div>
               </div>
             </div>
           </motion.div>

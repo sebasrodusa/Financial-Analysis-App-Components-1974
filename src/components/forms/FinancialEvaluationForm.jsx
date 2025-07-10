@@ -1,12 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiBarChart3, FiDollarSign, FiTrendingUp, FiSave, FiX, FiPieChart } = FiIcons;
+const { FiBarChart3, FiDollarSign, FiTrendingUp, FiSave, FiX, FiPieChart, FiUser } = FiIcons;
 
 const FinancialEvaluationForm = () => {
+  // Mock client data - in a real app this would come from an API or database
+  const [clients, setClients] = useState([
+    { id: 1, name: 'ABC Corp', industry: 'technology' },
+    { id: 2, name: 'Tech Innovations Inc', industry: 'technology' },
+    { id: 3, name: 'StartupXYZ', industry: 'technology' },
+    { id: 4, name: 'GreenTech Solutions', industry: 'manufacturing' },
+    { id: 5, name: 'Manufacturing Co', industry: 'manufacturing' },
+    { id: 6, name: 'Healthcare Systems Ltd', industry: 'healthcare' },
+    { id: 7, name: 'Finance Partners', industry: 'finance' }
+  ]);
+
   const [formData, setFormData] = useState({
+    clientId: '',
     clientName: '',
     evaluationDate: '',
     evaluationType: '',
@@ -29,6 +41,21 @@ const FinancialEvaluationForm = () => {
   const [activeTab, setActiveTab] = useState('financial');
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedClient, setSelectedClient] = useState(null);
+
+  // Handle client selection
+  useEffect(() => {
+    if (formData.clientId) {
+      const client = clients.find(c => c.id === parseInt(formData.clientId));
+      if (client) {
+        setSelectedClient(client);
+        setFormData(prev => ({
+          ...prev,
+          clientName: client.name,
+        }));
+      }
+    }
+  }, [formData.clientId, clients]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,7 +63,7 @@ const FinancialEvaluationForm = () => {
       ...prev,
       [name]: value
     }));
-    
+
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -47,33 +74,63 @@ const FinancialEvaluationForm = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
-    if (!formData.clientName.trim()) newErrors.clientName = 'Client name is required';
+    if (!formData.clientId) newErrors.clientId = 'Client is required';
     if (!formData.evaluationDate) newErrors.evaluationDate = 'Evaluation date is required';
     if (!formData.evaluationType) newErrors.evaluationType = 'Evaluation type is required';
     if (!formData.revenue) newErrors.revenue = 'Revenue is required';
     if (!formData.expenses) newErrors.expenses = 'Expenses are required';
-    
     return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = validateForm();
-    
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-    
+
     setIsSubmitting(true);
-    
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    console.log('Financial evaluation data:', formData);
-    alert('Financial evaluation saved successfully!');
+    // Store the evaluation in localStorage for later use in reports
+    const evaluationId = Date.now();
+    const evaluations = JSON.parse(localStorage.getItem('financialEvaluations') || '[]');
+    const newEvaluation = {
+      id: evaluationId,
+      ...formData,
+      createdAt: new Date().toISOString()
+    };
     
+    evaluations.push(newEvaluation);
+    localStorage.setItem('financialEvaluations', JSON.stringify(evaluations));
+    
+    console.log('Financial evaluation data:', newEvaluation);
+    alert('Financial evaluation saved successfully!');
     setIsSubmitting(false);
+    
+    // Reset form
+    setFormData({
+      clientId: '',
+      clientName: '',
+      evaluationDate: '',
+      evaluationType: '',
+      revenue: '',
+      expenses: '',
+      assets: '',
+      liabilities: '',
+      cashFlow: '',
+      profitMargin: '',
+      debtToEquity: '',
+      currentRatio: '',
+      quickRatio: '',
+      riskAssessment: '',
+      creditScore: '',
+      industryBenchmark: '',
+      recommendations: '',
+      nextReviewDate: ''
+    });
+    setSelectedClient(null);
   };
 
   const tabs = [
@@ -83,8 +140,7 @@ const FinancialEvaluationForm = () => {
   ];
 
   return (
-    <motion.div
-      className="max-w-6xl mx-auto"
+    <motion.div className="max-w-6xl mx-auto"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -95,6 +151,47 @@ const FinancialEvaluationForm = () => {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Financial Evaluation</h1>
             <p className="text-gray-600">Comprehensive financial analysis and risk assessment</p>
+          </div>
+        </div>
+
+        {/* Client Selection */}
+        <div className="mb-8 p-6 bg-blue-50 rounded-lg border border-blue-100">
+          <div className="flex items-center space-x-3 mb-4">
+            <SafeIcon icon={FiUser} className="text-xl text-blue-600" />
+            <h3 className="text-lg font-semibold text-gray-900">Client Selection</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Client *
+              </label>
+              <select
+                name="clientId"
+                value={formData.clientId}
+                onChange={handleChange}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                  errors.clientId ? 'border-red-500' : 'border-gray-300'
+                }`}
+              >
+                <option value="">Select a client</option>
+                {clients.map(client => (
+                  <option key={client.id} value={client.id}>{client.name}</option>
+                ))}
+              </select>
+              {errors.clientId && (
+                <p className="mt-1 text-sm text-red-600">{errors.clientId}</p>
+              )}
+            </div>
+            
+            {selectedClient && (
+              <div className="flex items-center">
+                <div className="bg-blue-100 p-3 rounded-lg">
+                  <div className="font-medium text-gray-900">{selectedClient.name}</div>
+                  <div className="text-sm text-gray-600 capitalize">Industry: {selectedClient.industry}</div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -118,26 +215,7 @@ const FinancialEvaluationForm = () => {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Basic Information */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Client Name *
-              </label>
-              <input
-                type="text"
-                name="clientName"
-                value={formData.clientName}
-                onChange={handleChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                  errors.clientName ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Enter client name"
-              />
-              {errors.clientName && (
-                <p className="mt-1 text-sm text-red-600">{errors.clientName}</p>
-              )}
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Evaluation Date *
@@ -155,7 +233,6 @@ const FinancialEvaluationForm = () => {
                 <p className="mt-1 text-sm text-red-600">{errors.evaluationDate}</p>
               )}
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Evaluation Type *
@@ -213,7 +290,6 @@ const FinancialEvaluationForm = () => {
                       <p className="mt-1 text-sm text-red-600">{errors.revenue}</p>
                     )}
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Annual Expenses *
@@ -235,7 +311,6 @@ const FinancialEvaluationForm = () => {
                       <p className="mt-1 text-sm text-red-600">{errors.expenses}</p>
                     )}
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Total Assets
@@ -252,7 +327,6 @@ const FinancialEvaluationForm = () => {
                       />
                     </div>
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Total Liabilities
@@ -269,7 +343,6 @@ const FinancialEvaluationForm = () => {
                       />
                     </div>
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Monthly Cash Flow
@@ -286,7 +359,6 @@ const FinancialEvaluationForm = () => {
                       />
                     </div>
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Credit Score
@@ -327,7 +399,6 @@ const FinancialEvaluationForm = () => {
                       <span className="absolute right-3 top-3.5 text-gray-400">%</span>
                     </div>
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Debt-to-Equity Ratio
@@ -342,7 +413,6 @@ const FinancialEvaluationForm = () => {
                       placeholder="0.00"
                     />
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Current Ratio
@@ -357,7 +427,6 @@ const FinancialEvaluationForm = () => {
                       placeholder="0.00"
                     />
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Quick Ratio
@@ -372,7 +441,6 @@ const FinancialEvaluationForm = () => {
                       placeholder="0.00"
                     />
                   </div>
-
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Industry Benchmark
@@ -414,7 +482,6 @@ const FinancialEvaluationForm = () => {
                       <option value="critical">Critical Risk</option>
                     </select>
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Recommendations
@@ -428,7 +495,6 @@ const FinancialEvaluationForm = () => {
                       placeholder="Enter detailed recommendations and analysis..."
                     />
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Next Review Date
@@ -457,7 +523,6 @@ const FinancialEvaluationForm = () => {
               <SafeIcon icon={FiX} />
               <span>Cancel</span>
             </motion.button>
-
             <motion.button
               type="submit"
               disabled={isSubmitting}
