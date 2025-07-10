@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useUser } from '@clerk/clerk-react';
+import { useUser } from '../../lib/mockClerk';
 import StatsCards from './StatsCards';
 import RecentActivity from './RecentActivity';
 import QuickActions from './QuickActions';
@@ -8,7 +8,7 @@ import FinancialChart from './FinancialChart';
 
 const Dashboard = () => {
   const { user } = useUser();
-
+  
   return (
     <div className="space-y-8">
       <motion.div
@@ -17,13 +17,13 @@ const Dashboard = () => {
         transition={{ duration: 0.5 }}
       >
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Welcome back, {user?.firstName}!
+          Welcome back, {user?.firstName || 'User'}!
         </h1>
         <p className="text-gray-600">
           Here's what's happening with your financial analysis platform today.
         </p>
       </motion.div>
-
+      
       <StatsCards />
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -32,7 +32,7 @@ const Dashboard = () => {
         </div>
         <QuickActions />
       </div>
-
+      
       <RecentActivity />
     </div>
   );

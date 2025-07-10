@@ -1,6 +1,6 @@
 import React from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
+import { ClerkProvider, SignedIn, SignedOut } from './lib/mockClerk';
 import { motion } from 'framer-motion';
 import AuthPage from './components/auth/AuthPage';
 import Dashboard from './components/dashboard/Dashboard';
@@ -10,11 +10,9 @@ import PDFReportViewer from './components/reports/PDFReportViewer';
 import Layout from './components/layout/Layout';
 import './App.css';
 
-const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_test_your_key_here';
-
 function App() {
   return (
-    <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
+    <ClerkProvider>
       <Router>
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
           <Routes>
@@ -33,7 +31,7 @@ function ProtectedRoutes() {
       <SignedIn>
         <Layout>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/client-form" element={<ClientForm />} />
             <Route path="/financial-evaluation" element={<FinancialEvaluationForm />} />
