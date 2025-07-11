@@ -70,9 +70,14 @@ const ClientForm = () => {
     setIsSubmitting(true);
     
     try {
-      // Here you would typically save the data to your backend
-      console.log('Form submitted:', formData);
-      
+      // Persist the client locally so it can be selected in evaluations
+      const storedClients = JSON.parse(localStorage.getItem('financialClients') || '[]');
+      const newClient = { id: Date.now(), ...formData };
+      storedClients.push(newClient);
+      localStorage.setItem('financialClients', JSON.stringify(storedClients));
+
+      console.log('Form submitted:', newClient);
+
       // Navigate to the dashboard or show success message
       navigate('/dashboard');
     } catch (error) {

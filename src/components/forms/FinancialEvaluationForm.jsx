@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
@@ -6,16 +7,14 @@ import * as FiIcons from 'react-icons/fi';
 const { FiBarChart3, FiDollarSign, FiTrendingUp, FiSave, FiX, FiPieChart, FiUser } = FiIcons;
 
 const FinancialEvaluationForm = () => {
-  // Mock client data - in a real app this would come from an API or database
-  const [clients, setClients] = useState([
-    { id: 1, name: 'ABC Corp', industry: 'technology' },
-    { id: 2, name: 'Tech Innovations Inc', industry: 'technology' },
-    { id: 3, name: 'StartupXYZ', industry: 'technology' },
-    { id: 4, name: 'GreenTech Solutions', industry: 'manufacturing' },
-    { id: 5, name: 'Manufacturing Co', industry: 'manufacturing' },
-    { id: 6, name: 'Healthcare Systems Ltd', industry: 'healthcare' },
-    { id: 7, name: 'Finance Partners', industry: 'finance' }
-  ]);
+  const navigate = useNavigate();
+  const [clients, setClients] = useState([]);
+
+  // Load clients from localStorage
+  useEffect(() => {
+    const stored = JSON.parse(localStorage.getItem('financialClients') || '[]');
+    setClients(stored);
+  }, []);
 
   const [formData, setFormData] = useState({
     clientId: '',
@@ -56,6 +55,20 @@ const FinancialEvaluationForm = () => {
       }
     }
   }, [formData.clientId, clients]);
+
+  if (clients.length === 0) {
+    return (
+      <motion.div className="max-w-xl mx-auto py-8 text-center">
+        <p className="mb-4 text-gray-600">No clients found. Please add a client first.</p>
+        <button
+          onClick={() => navigate('/client-form')}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+        >
+          Add Client
+        </button>
+      </motion.div>
+    );
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -98,6 +111,7 @@ const FinancialEvaluationForm = () => {
     const evaluations = JSON.parse(localStorage.getItem('financialEvaluations') || '[]');
     const newEvaluation = {
       id: evaluationId,
+      clientId: formData.clientId,
       ...formData,
       createdAt: new Date().toISOString()
     };
