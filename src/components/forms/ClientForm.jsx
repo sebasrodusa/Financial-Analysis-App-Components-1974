@@ -110,8 +110,6 @@ const ClientForm = () => {
       clients.push(newClient);
       localStorage.setItem('financialClients', JSON.stringify(clients));
 
-      console.log('Form submitted:', newClient);
-
       navigate('/dashboard');
     } catch (error) {
       console.error('Error submitting form:', error);
