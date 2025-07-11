@@ -332,35 +332,7 @@ const PDFReportViewer = () => {
                 </div>
               </div>
               
-              {selectedReport.evaluation && (
-                <div className="mb-6">
-                  <h3 className="font-medium text-gray-900 mb-2">Financial Summary</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-blue-50 p-3 rounded-lg">
-                      <p className="text-sm text-gray-500">Revenue</p>
-                      <p className="text-lg font-semibold">${Number(selectedReport.evaluation.revenue).toLocaleString()}</p>
-                    </div>
-                    <div className="bg-green-50 p-3 rounded-lg">
-                      <p className="text-sm text-gray-500">Expenses</p>
-                      <p className="text-lg font-semibold">${Number(selectedReport.evaluation.expenses).toLocaleString()}</p>
-                    </div>
-                    <div className="bg-purple-50 p-3 rounded-lg">
-                      <p className="text-sm text-gray-500">Profit</p>
-                      <p className="text-lg font-semibold">
-                        ${Number(selectedReport.evaluation.revenue - selectedReport.evaluation.expenses).toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="bg-orange-50 p-3 rounded-lg">
-                      <p className="text-sm text-gray-500">Margin</p>
-                      <p className="text-lg font-semibold">
-                        {selectedReport.evaluation.profitMargin || 
-                          Math.round((selectedReport.evaluation.revenue - selectedReport.evaluation.expenses) / 
-                          selectedReport.evaluation.revenue * 100)}%
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
+              {selectedReport && null}
               
               <div className="text-center py-8 bg-gray-100 rounded-lg">
                 <SafeIcon icon={FiFileText} className="text-6xl text-gray-400 mx-auto mb-4" />
