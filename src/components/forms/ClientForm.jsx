@@ -112,6 +112,7 @@ const ClientForm = () => {
 
       console.log('Form submitted:', newClient);
 
+      handleReset();
       navigate('/dashboard');
     } catch (error) {
       console.error('Error submitting form:', error);
