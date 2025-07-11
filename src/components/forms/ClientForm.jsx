@@ -68,13 +68,22 @@ const ClientForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
-      // Here you would typically save the data to your backend
-      console.log('Form submitted:', formData);
-      
-      // Navigate to the dashboard or show success message
-      navigate('/dashboard');
+      // Persist client data in localStorage
+      const existingClients = JSON.parse(localStorage.getItem('clients') || '[]');
+      const newClient = {
+        id: Date.now(),
+        ...formData
+      };
+
+      existingClients.push(newClient);
+      localStorage.setItem('clients', JSON.stringify(existingClients));
+
+      console.log('Form submitted:', newClient);
+
+      // Navigate back to the dashboard or evaluation form
+      navigate('/financial-evaluation');
     } catch (error) {
       console.error('Error submitting form:', error);
       setErrors({ submit: 'Failed to submit form. Please try again.' });
