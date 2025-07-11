@@ -36,6 +36,24 @@ const FinancialEvaluationForm = () => {
     clientName: '',
     evaluationDate: '',
     evaluationType: '',
+codex/update-financialevaluationform-with-income-and-expenses
+    revenue: '',
+    expenses: '',
+    assets: '',
+    liabilities: '',
+    cashFlow: '',
+    personalIncome: '',
+    spouseIncome: '',
+    realEstateIncome: '',
+    businessIncome: '',
+    otherIncome: '',
+    rentMortgage: '',
+    groceries: '',
+    transportation: '',
+    utilities: '',
+    insurance: '',
+    entertainment: '',
+    otherExpenses: '',
     monthlyIncome: '',
     monthlyExpenses: '',
     netIncome: '',
@@ -69,6 +87,51 @@ const FinancialEvaluationForm = () => {
       }
     }
   }, [formData.clientId, clients]);
+
+  // Compute derived values
+  useEffect(() => {
+    const totalIncome =
+      (parseFloat(formData.personalIncome) || 0) +
+      (parseFloat(formData.spouseIncome) || 0) +
+      (parseFloat(formData.realEstateIncome) || 0) +
+      (parseFloat(formData.businessIncome) || 0) +
+      (parseFloat(formData.otherIncome) || 0);
+
+    setFormData(prev => ({
+      ...prev,
+      monthlyIncome: totalIncome.toString(),
+    }));
+  }, [
+    formData.personalIncome,
+    formData.spouseIncome,
+    formData.realEstateIncome,
+    formData.businessIncome,
+    formData.otherIncome,
+  ]);
+
+  useEffect(() => {
+    const totalExpenses =
+      (parseFloat(formData.rentMortgage) || 0) +
+      (parseFloat(formData.groceries) || 0) +
+      (parseFloat(formData.transportation) || 0) +
+      (parseFloat(formData.utilities) || 0) +
+      (parseFloat(formData.insurance) || 0) +
+      (parseFloat(formData.entertainment) || 0) +
+      (parseFloat(formData.otherExpenses) || 0);
+
+    setFormData(prev => ({
+      ...prev,
+      monthlyExpenses: totalExpenses.toString(),
+    }));
+  }, [
+    formData.rentMortgage,
+    formData.groceries,
+    formData.transportation,
+    formData.utilities,
+    formData.insurance,
+    formData.entertainment,
+    formData.otherExpenses,
+  ]);
 
   // Compute derived values
   useEffect(() => {
@@ -153,6 +216,24 @@ const FinancialEvaluationForm = () => {
       clientName: '',
       evaluationDate: '',
       evaluationType: '',
+codex/update-financialevaluationform-with-income-and-expenses
+      revenue: '',
+      expenses: '',
+      assets: '',
+      liabilities: '',
+      cashFlow: '',
+      personalIncome: '',
+      spouseIncome: '',
+      realEstateIncome: '',
+      businessIncome: '',
+      otherIncome: '',
+      rentMortgage: '',
+      groceries: '',
+      transportation: '',
+      utilities: '',
+      insurance: '',
+      entertainment: '',
+      otherExpenses: '',
       monthlyIncome: '',
       monthlyExpenses: '',
       netIncome: '',
@@ -309,36 +390,157 @@ const FinancialEvaluationForm = () => {
             {activeTab === 'cashflow' && (
               <div className="space-y-6">
                 <h2 className="text-lg font-semibold text-gray-900">Cashflow</h2>
+
+                <h3 className="text-md font-semibold text-gray-800">Income</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Monthly Income
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Personal Income</label>
                     <input
                       type="number"
-                      name="monthlyIncome"
-                      value={formData.monthlyIncome}
+                      name="personalIncome"
+                      value={formData.personalIncome}
                       onChange={handleChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Monthly Expenses
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Spouse Income</label>
                     <input
                       type="number"
-                      name="monthlyExpenses"
-                      value={formData.monthlyExpenses}
+                      name="spouseIncome"
+                      value={formData.spouseIncome}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Real Estate Income</label>
+                    <input
+                      type="number"
+                      name="realEstateIncome"
+                      value={formData.realEstateIncome}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Business Income</label>
+                    <input
+                      type="number"
+                      name="businessIncome"
+                      value={formData.businessIncome}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Other Income</label>
+                    <input
+                      type="number"
+                      name="otherIncome"
+                      value={formData.otherIncome}
                       onChange={handleChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Net Income
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Monthly Income</label>
+                  <input
+                    type="number"
+                    name="monthlyIncome"
+                    value={formData.monthlyIncome}
+                    readOnly
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50"
+                  />
+                </div>
+
+                <h3 className="text-md font-semibold text-gray-800">Expenses</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Rent / Mortgage</label>
+                    <input
+                      type="number"
+                      name="rentMortgage"
+                      value={formData.rentMortgage}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Groceries</label>
+                    <input
+                      type="number"
+                      name="groceries"
+                      value={formData.groceries}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Transportation</label>
+                    <input
+                      type="number"
+                      name="transportation"
+                      value={formData.transportation}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Utilities</label>
+                    <input
+                      type="number"
+                      name="utilities"
+                      value={formData.utilities}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Insurance</label>
+                    <input
+                      type="number"
+                      name="insurance"
+                      value={formData.insurance}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Entertainment</label>
+                    <input
+                      type="number"
+                      name="entertainment"
+                      value={formData.entertainment}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Other Expenses</label>
+                    <input
+                      type="number"
+                      name="otherExpenses"
+                      value={formData.otherExpenses}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Monthly Expenses</label>
+                  <input
+                    type="number"
+                    name="monthlyExpenses"
+                    value={formData.monthlyExpenses}
+                    readOnly
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Net Income</label>
                   <input
                     type="number"
                     name="netIncome"
