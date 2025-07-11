@@ -132,8 +132,14 @@ const FinancialEvaluationForm = () => {
     if (!formData.clientId) newErrors.clientId = 'Client is required';
     if (!formData.evaluationDate) newErrors.evaluationDate = 'Evaluation date is required';
     if (!formData.evaluationType) newErrors.evaluationType = 'Evaluation type is required';
-    if (!formData.revenue) newErrors.revenue = 'Revenue is required';
-    if (!formData.expenses) newErrors.expenses = 'Expenses are required';
+
+    // Removed revenue/expense validation as those fields were dropped
+
+    // Optional: ensure at least one cashflow category is provided
+    if (!formData.monthlyIncome) {
+      newErrors.monthlyIncome = 'Monthly income is required';
+    }
+
     return newErrors;
   };
 
