@@ -44,6 +44,7 @@ const ClientForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     if (name.startsWith('spouse.')) {
       const spouseField = name.split('.')[1];
       setFormData(prev => ({
@@ -54,6 +55,10 @@ const ClientForm = () => {
         }
       }));
     } else {
+      if (name === 'maritalStatus') {
+        setShowSpouseInfo(value === 'married');
+      }
+
       setFormData(prev => ({
         ...prev,
         [name]: value
@@ -65,15 +70,48 @@ const ClientForm = () => {
     }
   };
 
+  const handleChildChange = (index, e) => {
+    const { name, value } = e.target;
+    setFormData(prev => {
+      const updatedChildren = [...prev.children];
+      updatedChildren[index] = {
+        ...updatedChildren[index],
+        [name]: value
+      };
+      return {
+        ...prev,
+        children: updatedChildren
+      };
+    });
+  };
+
+  const addChild = () => {
+    setFormData(prev => ({
+      ...prev,
+      children: [...prev.children, { name: '', dob: '' }]
+    }));
+  };
+
+  const removeChild = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      children: prev.children.filter((_, i) => i !== index)
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     
     try {
-      // Here you would typically save the data to your backend
-      console.log('Form submitted:', formData);
-      
-      // Navigate to the dashboard or show success message
+      const clientId = Date.now();
+      const clients = JSON.parse(localStorage.getItem('financialClients') || '[]');
+      const newClient = { id: clientId, ...formData };
+      clients.push(newClient);
+      localStorage.setItem('financialClients', JSON.stringify(clients));
+
+      console.log('Form submitted:', newClient);
+
       navigate('/dashboard');
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -168,10 +206,152 @@ const ClientForm = () => {
                   placeholder="Enter last name"
                 />
               </div>
-              {/* Add the rest of your form fields here */}
-            </div>
-          </div>
 
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Gender
+                </label>
+                <select
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Select gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Marital Status
+                </label>
+                <select
+                  name="maritalStatus"
+                  value={formData.maritalStatus}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Select status</option>
+                  <option value="single">Single</option>
+                  <option value="married">Married</option>
+                  <option value="divorced">Divorced</option>
+                  <option value="widowed">Widowed</option>
+                </select>
+              </div>
+            </div>
+
+            {showSpouseInfo && (
+              <div className="mt-6 space-y-4 bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <SafeIcon icon={FiUsers} />
+                  <h3 className="font-semibold text-gray-900">Spouse Information</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                    <input
+                      type="text"
+                      name="spouse.firstName"
+                      value={formData.spouse.firstName}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                    <input
+                      type="text"
+                      name="spouse.lastName"
+                      value={formData.spouse.lastName}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
+                    <input
+                      type="date"
+                      name="spouse.dateOfBirth"
+                      value={formData.spouse.dateOfBirth}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input
+                      type="email"
+                      name="spouse.email"
+                      value={formData.spouse.email}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                    <input
+                      type="tel"
+                      name="spouse.phone"
+                      value={formData.spouse.phone}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <SafeIcon icon={FiUsers} />
+                  <h3 className="font-semibold text-gray-900">Children</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={addChild}
+                  className="flex items-center text-sm text-blue-600 hover:text-blue-800"
+                >
+                  <SafeIcon icon={FiPlus} />
+                  <span className="ml-1">Add Child</span>
+                </button>
+              </div>
+              {formData.children.map((child, idx) => (
+                <div key={idx} className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={child.name}
+                      onChange={(e) => handleChildChange(idx, e)}
+                      className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
+                    <input
+                      type="date"
+                      name="dob"
+                      value={child.dob}
+                      onChange={(e) => handleChildChange(idx, e)}
+                      className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeChild(idx)}
+                    className="text-red-600 text-sm mt-2"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+              </div>
+            </div>
           {/* Form Actions */}
           <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
             <motion.button
