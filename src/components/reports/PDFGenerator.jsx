@@ -71,11 +71,6 @@ const PDFGenerator = ({ onClose }) => {
       doc.text(`Client: ${selectedEvaluation.clientName}`, 10, 20);
       doc.text(`Type: ${selectedEvaluation.evaluationType}`, 10, 30);
       doc.text(`Date: ${new Date(selectedEvaluation.evaluationDate).toLocaleDateString()}`, 10, 40);
-      doc.text(`Revenue: $${Number(selectedEvaluation.revenue).toLocaleString()}`, 10, 50);
-      doc.text(`Expenses: $${Number(selectedEvaluation.expenses).toLocaleString()}`, 10, 60);
-      if (selectedEvaluation.profitMargin) {
-        doc.text(`Profit Margin: ${selectedEvaluation.profitMargin}%`, 10, 70);
-      }
     }
     doc.save(`${reportData.title || 'report'}.pdf`);
     return doc;
@@ -182,16 +177,7 @@ const PDFGenerator = ({ onClose }) => {
                     <p className="text-sm text-gray-600">
                       Date: {new Date(selectedEvaluation.evaluationDate).toLocaleDateString()}
                     </p>
-                    <div className="mt-2 grid grid-cols-2 gap-2">
-                      <div className="bg-white rounded p-2 text-sm">
-                        <span className="text-gray-600">Revenue:</span>
-                        <span className="ml-1 font-medium">${Number(selectedEvaluation.revenue).toLocaleString()}</span>
-                      </div>
-                      <div className="bg-white rounded p-2 text-sm">
-                        <span className="text-gray-600">Expenses:</span>
-                        <span className="ml-1 font-medium">${Number(selectedEvaluation.expenses).toLocaleString()}</span>
-                      </div>
-                    </div>
+                    <div className="mt-2" />
                   </div>
                 </div>
               </div>
@@ -357,28 +343,7 @@ const PDFGenerator = ({ onClose }) => {
                     </div>
                   )}
                   
-                  {reportData.includeRatios && (
-                    <div className="py-2">
-                      <div className="flex items-center text-green-600 mb-1">
-                        <SafeIcon icon={FiPieChart} className="mr-1" />
-                        <span className="text-xs">Financial Ratios</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        {selectedEvaluation.profitMargin && (
-                          <div className="flex justify-between bg-gray-50 p-1 rounded">
-                            <span>Profit Margin:</span>
-                            <span>{selectedEvaluation.profitMargin}%</span>
-                          </div>
-                        )}
-                        {selectedEvaluation.currentRatio && (
-                          <div className="flex justify-between bg-gray-50 p-1 rounded">
-                            <span>Current Ratio:</span>
-                            <span>{selectedEvaluation.currentRatio}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
+                  {reportData.includeRatios && null}
                   
                   {reportData.includeRecommendations && selectedEvaluation.recommendations && (
                     <div className="py-2">
