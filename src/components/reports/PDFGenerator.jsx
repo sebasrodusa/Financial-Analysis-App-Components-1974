@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
+import { jsPDF } from 'jspdf';
 
 const { FiFileText, FiDownload, FiX, FiSettings, FiUser, FiBarChart3, FiTrendingUp, FiDollarSign } = FiIcons;
 
@@ -51,14 +52,29 @@ const PDFGenerator = ({ onClose }) => {
     }));
   };
 
+  const generateDocument = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text(reportData.title || 'Financial Report', 10, 10);
+    doc.setFontSize(12);
+    if (selectedEvaluation) {
+      doc.text(`Client: ${selectedEvaluation.clientName}`, 10, 20);
+      doc.text(`Type: ${selectedEvaluation.evaluationType}`, 10, 30);
+      doc.text(`Date: ${new Date(selectedEvaluation.evaluationDate).toLocaleDateString()}`, 10, 40);
+      doc.text(`Revenue: $${Number(selectedEvaluation.revenue).toLocaleString()}`, 10, 50);
+      doc.text(`Expenses: $${Number(selectedEvaluation.expenses).toLocaleString()}`, 10, 60);
+      if (selectedEvaluation.profitMargin) {
+        doc.text(`Profit Margin: ${selectedEvaluation.profitMargin}%`, 10, 70);
+      }
+    }
+    doc.save(`${reportData.title || 'report'}.pdf`);
+    return doc;
+  };
+
   const handleGenerate = async () => {
     setIsGenerating(true);
-    // Simulate PDF generation
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // In a real app, you would use a library like jsPDF or call an API
-    console.log('Generating PDF with data:', reportData);
-    
+    const doc = generateDocument();
+
     // Save report to localStorage
     const reports = JSON.parse(localStorage.getItem('financialReports') || '[]');
     const newReport = {
@@ -76,6 +92,17 @@ const PDFGenerator = ({ onClose }) => {
     alert('PDF report generated successfully!');
     setIsGenerating(false);
     onClose();
+  };
+
+  const handlePrint = () => {
+    const doc = generateDocument();
+    doc.autoPrint();
+    const url = doc.output('bloburl');
+    const win = window.open(url);
+    if (win) {
+      win.focus();
+      win.print();
+    }
   };
 
   return (
@@ -371,6 +398,15 @@ const PDFGenerator = ({ onClose }) => {
               whileTap={{ scale: 0.98 }}
             >
               Cancel
+            </motion.button>
+            <motion.button
+              onClick={handlePrint}
+              disabled={!selectedEvaluation}
+              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Print
             </motion.button>
             <motion.button
               onClick={handleGenerate}
