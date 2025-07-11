@@ -32,7 +32,6 @@ const PDFGenerator = ({ onClose }) => {
     reportType: '',
     dateRange: '',
     includeCharts: true,
-    includeRatios: true,
     includeRecommendations: true,
     template: 'standard'
   });
@@ -71,11 +70,9 @@ const PDFGenerator = ({ onClose }) => {
       doc.text(`Client: ${selectedEvaluation.clientName}`, 10, 20);
       doc.text(`Type: ${selectedEvaluation.evaluationType}`, 10, 30);
       doc.text(`Date: ${new Date(selectedEvaluation.evaluationDate).toLocaleDateString()}`, 10, 40);
-      doc.text(`Revenue: $${Number(selectedEvaluation.revenue).toLocaleString()}`, 10, 50);
-      doc.text(`Expenses: $${Number(selectedEvaluation.expenses).toLocaleString()}`, 10, 60);
-      if (selectedEvaluation.profitMargin) {
-        doc.text(`Profit Margin: ${selectedEvaluation.profitMargin}%`, 10, 70);
-      }
+      doc.text(`Monthly Income: $${Number(selectedEvaluation.monthlyIncome || 0).toLocaleString()}`, 10, 50);
+      doc.text(`Monthly Expenses: $${Number(selectedEvaluation.monthlyExpenses || 0).toLocaleString()}`, 10, 60);
+      doc.text(`Net Income: $${Number(selectedEvaluation.netIncome || 0).toLocaleString()}`, 10, 70);
     }
     doc.save(`${reportData.title || 'report'}.pdf`);
     return doc;
@@ -184,12 +181,16 @@ const PDFGenerator = ({ onClose }) => {
                     </p>
                     <div className="mt-2 grid grid-cols-2 gap-2">
                       <div className="bg-white rounded p-2 text-sm">
-                        <span className="text-gray-600">Revenue:</span>
-                        <span className="ml-1 font-medium">${Number(selectedEvaluation.revenue).toLocaleString()}</span>
+                        <span className="text-gray-600">Monthly Income:</span>
+                        <span className="ml-1 font-medium">${Number(selectedEvaluation.monthlyIncome || 0).toLocaleString()}</span>
                       </div>
                       <div className="bg-white rounded p-2 text-sm">
-                        <span className="text-gray-600">Expenses:</span>
-                        <span className="ml-1 font-medium">${Number(selectedEvaluation.expenses).toLocaleString()}</span>
+                        <span className="text-gray-600">Monthly Expenses:</span>
+                        <span className="ml-1 font-medium">${Number(selectedEvaluation.monthlyExpenses || 0).toLocaleString()}</span>
+                      </div>
+                      <div className="bg-white rounded p-2 text-sm col-span-2">
+                        <span className="text-gray-600">Net Income:</span>
+                        <span className="ml-1 font-medium">${Number(selectedEvaluation.netIncome || 0).toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
@@ -300,16 +301,6 @@ const PDFGenerator = ({ onClose }) => {
               <label className="flex items-center">
                 <input
                   type="checkbox"
-                  name="includeRatios"
-                  checked={reportData.includeRatios}
-                  onChange={handleChange}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="ml-3 text-sm text-gray-700">Include Financial Ratios</span>
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
                   name="includeRecommendations"
                   checked={reportData.includeRecommendations}
                   onChange={handleChange}
@@ -352,33 +343,11 @@ const PDFGenerator = ({ onClose }) => {
                         <span className="text-xs">Financial Charts</span>
                       </div>
                       <div className="h-10 bg-gray-100 rounded flex items-center justify-center">
-                        <span className="text-xs text-gray-500">Revenue & Expenses Chart</span>
+                        <span className="text-xs text-gray-500">Income & Expenses Chart</span>
                       </div>
                     </div>
                   )}
                   
-                  {reportData.includeRatios && (
-                    <div className="py-2">
-                      <div className="flex items-center text-green-600 mb-1">
-                        <SafeIcon icon={FiPieChart} className="mr-1" />
-                        <span className="text-xs">Financial Ratios</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        {selectedEvaluation.profitMargin && (
-                          <div className="flex justify-between bg-gray-50 p-1 rounded">
-                            <span>Profit Margin:</span>
-                            <span>{selectedEvaluation.profitMargin}%</span>
-                          </div>
-                        )}
-                        {selectedEvaluation.currentRatio && (
-                          <div className="flex justify-between bg-gray-50 p-1 rounded">
-                            <span>Current Ratio:</span>
-                            <span>{selectedEvaluation.currentRatio}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
                   
                   {reportData.includeRecommendations && selectedEvaluation.recommendations && (
                     <div className="py-2">
