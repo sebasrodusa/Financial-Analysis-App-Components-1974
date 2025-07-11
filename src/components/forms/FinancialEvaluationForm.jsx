@@ -159,8 +159,7 @@ const FinancialEvaluationForm = () => {
     
     evaluations.push(newEvaluation);
     localStorage.setItem('financialEvaluations', JSON.stringify(evaluations));
-    
-    console.log('Financial evaluation data:', newEvaluation);
+
     alert('Financial evaluation saved successfully!');
     setIsSubmitting(false);
     

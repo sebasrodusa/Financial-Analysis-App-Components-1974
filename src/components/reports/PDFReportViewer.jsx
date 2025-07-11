@@ -94,12 +94,10 @@ const PDFReportViewer = () => {
   const handleViewReport = (report) => {
     setSelectedReport(report);
     // In a real app, you would open the PDF viewer here
-    console.log('Viewing report:', report);
   };
 
   const handleDownloadReport = (report) => {
     // In a real app, you would trigger the download here
-    console.log('Downloading report:', report);
     alert(`Downloading ${report.title}...`);
   };
 
