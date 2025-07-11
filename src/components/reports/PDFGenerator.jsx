@@ -4,7 +4,17 @@ import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import { jsPDF } from 'jspdf';
 
-const { FiFileText, FiDownload, FiX, FiSettings, FiUser, FiBarChart3, FiTrendingUp, FiDollarSign, FiPieChart } = FiIcons;
+const {
+  FiFileText,
+  FiDownload,
+  FiX,
+  FiSettings,
+  FiUser,
+  FiBarChart3,
+  FiTrendingUp,
+  FiDollarSign,
+  FiPieChart,
+} = FiIcons;
 
 const PDFGenerator = ({ onClose }) => {
   // Get evaluations from localStorage
