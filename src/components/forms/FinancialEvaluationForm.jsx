@@ -3,7 +3,21 @@ import { motion } from 'framer-motion';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiBarChart3, FiDollarSign, FiTrendingUp, FiSave, FiX, FiPieChart, FiUser } = FiIcons;
+const {
+  FiBarChart3,
+  FiDollarSign,
+  FiTrendingUp,
+  FiSave,
+  FiX,
+  FiPieChart,
+  FiUser,
+  FiCreditCard,
+  FiFileText,
+  FiShield,
+  FiEdit,
+  FiLayers,
+  FiFlag,
+} = FiIcons;
 
 const FinancialEvaluationForm = () => {
   // Mock client data - in a real app this would come from an API or database
@@ -27,6 +41,19 @@ const FinancialEvaluationForm = () => {
     assets: '',
     liabilities: '',
     cashFlow: '',
+    monthlyIncome: '',
+    monthlyExpenses: '',
+    netIncome: '',
+    bsAssets: '',
+    bsLiabilities: '',
+    netWorth: '',
+    lifePolicyInfo: '',
+    coverageIncome: '',
+    coverageYears: '',
+    coverageNeeded: '',
+    debtList: '',
+    debtStrategy: '',
+    goals: '',
     profitMargin: '',
     debtToEquity: '',
     currentRatio: '',
@@ -56,6 +83,34 @@ const FinancialEvaluationForm = () => {
       }
     }
   }, [formData.clientId, clients]);
+
+  // Compute derived values
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      netIncome:
+        (parseFloat(prev.monthlyIncome) || 0) -
+        (parseFloat(prev.monthlyExpenses) || 0),
+    }));
+  }, [formData.monthlyIncome, formData.monthlyExpenses]);
+
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      netWorth:
+        (parseFloat(prev.bsAssets) || 0) -
+        (parseFloat(prev.bsLiabilities) || 0),
+    }));
+  }, [formData.bsAssets, formData.bsLiabilities]);
+
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      coverageNeeded:
+        (parseFloat(prev.coverageIncome) || 0) *
+        (parseFloat(prev.coverageYears) || 0),
+    }));
+  }, [formData.coverageIncome, formData.coverageYears]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -120,6 +175,19 @@ const FinancialEvaluationForm = () => {
       assets: '',
       liabilities: '',
       cashFlow: '',
+      monthlyIncome: '',
+      monthlyExpenses: '',
+      netIncome: '',
+      bsAssets: '',
+      bsLiabilities: '',
+      netWorth: '',
+      lifePolicyInfo: '',
+      coverageIncome: '',
+      coverageYears: '',
+      coverageNeeded: '',
+      debtList: '',
+      debtStrategy: '',
+      goals: '',
       profitMargin: '',
       debtToEquity: '',
       currentRatio: '',
@@ -136,7 +204,13 @@ const FinancialEvaluationForm = () => {
   const tabs = [
     { id: 'financial', label: 'Financial Data', icon: FiDollarSign },
     { id: 'ratios', label: 'Financial Ratios', icon: FiPieChart },
-    { id: 'analysis', label: 'Risk Analysis', icon: FiTrendingUp }
+    { id: 'analysis', label: 'Risk Analysis', icon: FiTrendingUp },
+    { id: 'cashflow', label: 'Cashflow', icon: FiCreditCard },
+    { id: 'balance', label: 'Balance Sheet', icon: FiFileText },
+    { id: 'policies', label: 'Life Insurance Policies', icon: FiShield },
+    { id: 'calculator', label: 'Life Insurance Calculator', icon: FiEdit },
+    { id: 'debts', label: 'Debt Stacking', icon: FiLayers },
+    { id: 'goals', label: 'Goals and Dreams', icon: FiFlag }
   ];
 
   return (
@@ -507,6 +581,204 @@ const FinancialEvaluationForm = () => {
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     />
                   </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'cashflow' && (
+              <div className="space-y-6">
+                <h2 className="text-lg font-semibold text-gray-900">Cashflow</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Monthly Income
+                    </label>
+                    <input
+                      type="number"
+                      name="monthlyIncome"
+                      value={formData.monthlyIncome}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Monthly Expenses
+                    </label>
+                    <input
+                      type="number"
+                      name="monthlyExpenses"
+                      value={formData.monthlyExpenses}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Net Income
+                  </label>
+                  <input
+                    type="number"
+                    name="netIncome"
+                    value={formData.netIncome}
+                    readOnly
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50"
+                  />
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'balance' && (
+              <div className="space-y-6">
+                <h2 className="text-lg font-semibold text-gray-900">Balance Sheet</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Assets
+                    </label>
+                    <input
+                      type="number"
+                      name="bsAssets"
+                      value={formData.bsAssets}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Liabilities
+                    </label>
+                    <input
+                      type="number"
+                      name="bsLiabilities"
+                      value={formData.bsLiabilities}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Net Worth
+                  </label>
+                  <input
+                    type="number"
+                    name="netWorth"
+                    value={formData.netWorth}
+                    readOnly
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50"
+                  />
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'policies' && (
+              <div className="space-y-6">
+                <h2 className="text-lg font-semibold text-gray-900">Life Insurance Policies</h2>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Policy Information
+                  </label>
+                  <textarea
+                    name="lifePolicyInfo"
+                    value={formData.lifePolicyInfo}
+                    onChange={handleChange}
+                    rows={4}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  />
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'calculator' && (
+              <div className="space-y-6">
+                <h2 className="text-lg font-semibold text-gray-900">Life Insurance Calculator</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Annual Income to Replace
+                    </label>
+                    <input
+                      type="number"
+                      name="coverageIncome"
+                      value={formData.coverageIncome}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Years of Coverage
+                    </label>
+                    <input
+                      type="number"
+                      name="coverageYears"
+                      value={formData.coverageYears}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Coverage Needed
+                  </label>
+                  <input
+                    type="number"
+                    name="coverageNeeded"
+                    value={formData.coverageNeeded}
+                    readOnly
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50"
+                  />
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'debts' && (
+              <div className="space-y-6">
+                <h2 className="text-lg font-semibold text-gray-900">Debt Stacking</h2>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Debts
+                  </label>
+                  <textarea
+                    name="debtList"
+                    value={formData.debtList}
+                    onChange={handleChange}
+                    rows={4}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Ordering Strategy
+                  </label>
+                  <textarea
+                    name="debtStrategy"
+                    value={formData.debtStrategy}
+                    onChange={handleChange}
+                    rows={3}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  />
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'goals' && (
+              <div className="space-y-6">
+                <h2 className="text-lg font-semibold text-gray-900">Goals and Dreams</h2>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Your Goals
+                  </label>
+                  <textarea
+                    name="goals"
+                    value={formData.goals}
+                    onChange={handleChange}
+                    rows={4}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  />
                 </div>
               </div>
             )}
