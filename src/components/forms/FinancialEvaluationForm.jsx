@@ -36,7 +36,7 @@ const FinancialEvaluationForm = () => {
     clientName: '',
     evaluationDate: '',
     evaluationType: '',
-codex/update-financialevaluationform-with-income-and-expenses
+// codex/update-financialevaluationform-with-income-and-expenses
     revenue: '',
     expenses: '',
     assets: '',
